@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}StreamFlix{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface2: #1c1c28;
+      --border: #2a2a3d;
+      --accent: #e50914;
+      --accent2: #ff6b35;
+      --text: #f0f0f5;
+      --muted: #8888aa;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 64px;
+      background: linear-gradient(to bottom, rgba(10,10,15,0.95) 0%, transparent 100%);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.3s;
+    }
+    .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent); letter-spacing: 2px; }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-links a { color: var(--muted); font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .nav-user { display: flex; align-items: center; gap: 16px; }
+    .nav-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; cursor: pointer;
+    }
+    .nav-search { display: flex; align-items: center; gap: 8px; }
+    .nav-search input {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 7px 14px; border-radius: 6px;
+      font-size: 0.85rem; width: 200px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .nav-search input:focus { border-color: var(--accent); }
+
+    main { padding-top: 64px; min-height: 100vh; }
+
+    /* FLASH */
+    .flash-container { position: fixed; top: 76px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+    .flash {
+      padding: 12px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+      animation: slideIn 0.3s ease; max-width: 320px;
+      border: 1px solid transparent;
+    }
+    .flash.success { background: rgba(34,197,94,0.15); border-color: var(--success); color: var(--success); }
+    .flash.error { background: rgba(229,9,20,0.15); border-color: var(--accent); color: #ff6b6b; }
+    .flash.warning { background: rgba(245,158,11,0.15); border-color: var(--warning); color: var(--warning); }
+    @keyframes slideIn { from { transform: translateX(40px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px; border-radius: 6px; font-size: 0.9rem;
+      font-weight: 600; cursor: pointer; border: none; transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: #c40812; transform: translateY(-1px); }
+    .btn-ghost { background: rgba(255,255,255,0.1); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.18); }
+    .btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+    .btn-danger { background: rgba(229,9,20,0.15); color: var(--accent); border: 1px solid var(--accent); }
+    .btn-danger:hover { background: var(--accent); color: white; }
+
+    /* CARDS */
+    .video-card {
+      position: relative; border-radius: 8px; overflow: hidden;
+      background: var(--surface2); cursor: pointer;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .video-card:hover { transform: scale(1.04); z-index: 2; box-shadow: 0 16px 40px rgba(0,0,0,0.6); }
+    .video-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+    .video-card-placeholder {
+      width: 100%; aspect-ratio: 16/9;
+      background: linear-gradient(135deg, var(--surface2), var(--border));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: var(--muted);
+    }
+    .video-card-info { padding: 10px 12px 12px; }
+    .video-card-title { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .video-card-meta { font-size: 0.78rem; color: var(--muted); margin-top: 4px; display: flex; gap: 10px; }
+    .video-card-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .video-card:hover .video-card-overlay { opacity: 1; }
+    .play-btn-circle {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--accent); display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; transform: scale(0.9); transition: transform 0.2s;
+    }
+    .video-card:hover .play-btn-circle { transform: scale(1); }
+
+    /* GRID */
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+
+    /* SECTION */
+    .section { padding: 32px 48px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 1px; }
+
+    /* FOOTER */
+    footer {
+      padding: 40px 48px; margin-top: 60px;
+      border-top: 1px solid var(--border); color: var(--muted); font-size: 0.82rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* BADGE */
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-genre { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .badge-featured { background: var(--accent); color: white; }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* TABLE */
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+    td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.88rem; vertical-align: middle; }
+    tr:hover td { background: var(--surface2); }
+
+    /* FORM */
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.6px; }
+    .form-control {
+      width: 100%; padding: 10px 14px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+      font-size: 0.9rem; font-family: inherit; outline: none; transition: border-color 0.2s;
+    }
+    .form-control:focus { border-color: var(--accent); }
+    textarea.form-control { resize: vertical; min-height: 100px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-check { display: flex; align-items: center; gap: 10px; }
+    .form-check input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+
+    /* STATUS PILL */
+    .pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .pill-green { background: rgba(34,197,94,0.15); color: var(--success); }
+    .pill-red { background: rgba(229,9,20,0.1); color: #ff6b6b; }
+    .pill-yellow { background: rgba(245,158,11,0.15); color: var(--warning); }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .section { padding: 24px 20px; }
+      .video-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container" id="flashContainer">
+  {% for category, message in messages %}
+  <div class="flash {{ category }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+{% if current_user.is_authenticated %}
+<nav>
+  <a href="{{ url_for('main.index') }}" class="nav-logo">STREAMFLIX</a>
+  <div class="nav-links">
+    <a href="{{ url_for('main.index') }}" class="{{ 'active' if request.endpoint == 'main.index' }}">Home</a>
+    <a href="{{ url_for('main.browse') }}" class="{{ 'active' if request.endpoint == 'main.browse' }}">Browse</a>
+    {% if current_user.is_admin %}
+    <a href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.blueprint == 'admin' }}" style="color: var(--accent2);">Admin</a>
+    {% endif %}
+  </div>
+  <div class="nav-user">
+    <form action="{{ url_for('main.browse') }}" method="GET" class="nav-search">
+      <input name="q" placeholder="Search titles…" value="{{ request.args.get('q','') }}">
+    </form>
+    <div class="nav-avatar" title="{{ current_user.username }}">{{ current_user.username[0].upper() }}</div>
+    <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm">Sign Out</a>
+  </div>
+</nav>
+{% endif %}
+
+<main>{% block content %}{% endblock %}</main>
+
+{% if current_user.is_authenticated %}
+<footer>
+  <span style="font-family: 'Bebas Neue'; font-size:1.2rem; color: var(--accent);">STREAMFLIX</span>
+  <span>© 2025 StreamFlix. All rights reserved.</span>
+</footer>
+{% endif %}
+
+<script>
+  // Auto-dismiss flash messages
+  setTimeout(() => {
+    const fc = document.getElementById('flashContainer');
+    if (fc) fc.style.transition = 'opacity 0.5s', fc.style.opacity = '0', setTimeout(() => fc.remove(), 500);
+  }, 4000);
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

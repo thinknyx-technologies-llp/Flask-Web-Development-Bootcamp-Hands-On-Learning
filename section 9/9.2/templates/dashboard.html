@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Flask Auth App{% endblock %}
+
+{% block content %}
+<h2>User Dashboard</h2>
+
+<div class="info-card">
+    <h3>Welcome, {{ username }}!</h3>
+    
+    <div class="info-item">
+        <strong>Username:</strong> {{ username }}
+    </div>
+    
+    <div class="info-item">
+        <strong>Email:</strong> {{ email }}
+    </div>
+    
+    <div class="info-item">
+        <strong>Account Status:</strong> Active
+    </div>
+</div>
+<div style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+    <h3>Session Management</h3>
+    <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <a href="/session-info" class="btn" style="background: #17a2b8;">View Session Details</a>
+        <a href="/extend-session" class="btn" style="background: #28a745;">Extend Session</a>
+    </div>
+    <p style="margin-top: 10px; color: #666; font-size: 14px;">
+        Your session will expire after 30 minutes of inactivity.
+        Current session age: 
+        {% if session.login_time %}
+            {% set login_time = session.login_time %}
+            <span id="session-age">Calculating...</span>
+        {% endif %}
+    </p>
+</div>
+
+<script>
+    // Calculate and display session age
+    {% if session.login_time %}
+    function updateSessionAge() {
+        const loginTime = new Date("{{ session.login_time }}");
+        const now = new Date();
+        const diffMinutes = (now - loginTime) / 1000 / 60;
+        const ageSpan = document.getElementById('session-age');
+        if (ageSpan) {
+            ageSpan.textContent = diffMinutes.toFixed(1) + ' minutes';
+            if (diffMinutes > 25) {
+                ageSpan.style.color = 'orange';
+            }
+            if (diffMinutes > 30) {
+                ageSpan.style.color = 'red';
+                ageSpan.textContent += ' (will expire soon)';
+            }
+        }
+    }
+    updateSessionAge();
+    setInterval(updateSessionAge, 60000); // Update every minute
+    {% endif %}
+</script>
+
+<div style="margin-top: 30px;">
+    <p>This is your secure dashboard. Only authenticated users can access this page.</p>
+    <a href="/logout" class="btn" style="background: #dc3545; margin-top: 20px;">Logout</a>
+</div>
+{% endblock %}

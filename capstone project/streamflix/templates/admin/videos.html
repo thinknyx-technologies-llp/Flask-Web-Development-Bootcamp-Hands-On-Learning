@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Manage Videos — Admin{% endblock %}
+
+{% block head %}
+<style>
+  .admin-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px);}
+  .admin-sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;}
+  .sidebar-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);padding:0 28px;margin-bottom:4px;}
+  .sidebar-link{display:flex;align-items:center;gap:10px;padding:9px 28px;font-size:.88rem;font-weight:500;color:var(--muted);transition:all .15s;text-decoration:none;margin-bottom:2px;}
+  .sidebar-link:hover,.sidebar-link.active{background:var(--surface2);color:var(--text);}
+  .sidebar-link.active{color:var(--accent);}
+  .admin-main{padding:32px;}
+  .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+  .page-header h1{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .thumb-mini{width:72px;height:40px;border-radius:4px;object-fit:cover;background:var(--surface2);}
+  .thumb-mini-placeholder{width:72px;height:40px;border-radius:4px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+  .action-btns{display:flex;gap:8px;}
+  @media(max-width:768px){.admin-layout{grid-template-columns:1fr;}.admin-sidebar{display:none;}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div style="padding:0 28px 20px;">
+      <div style="font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Admin Panel</div>
+      <div style="font-size:.92rem;font-weight:600;">{{ current_user.username }}</div>
+    </div>
+    <div style="margin-bottom:8px;">
+      <div class="sidebar-label">Content</div>
+      <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">📊 Dashboard</a>
+      <a href="{{ url_for('admin.videos') }}" class="sidebar-link active">🎬 Videos</a>
+      <a href="{{ url_for('admin.add_video') }}" class="sidebar-link">➕ Add Video</a>
+    </div>
+    <div style="margin-bottom:8px;">
+      <div class="sidebar-label">Users</div>
+      <a href="{{ url_for('admin.users') }}" class="sidebar-link">👥 All Users</a>
+    </div>
+    <div>
+      <div class="sidebar-label">Site</div>
+      <a href="{{ url_for('main.index') }}" class="sidebar-link">🏠 View Site</a>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="page-header">
+      <h1>Manage Videos <span style="font-size:1rem;font-family:'DM Sans';color:var(--muted);font-weight:400;">{{ videos|length }} total</span></h1>
+      <a href="{{ url_for('admin.add_video') }}" class="btn btn-primary">+ Add Video</a>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:80px;">Thumb</th>
+            <th>Title</th>
+            <th>Genre</th>
+            <th>Year</th>
+            <th>Views</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for video in videos %}
+          <tr>
+            <td>
+              {% if video.thumbnail_url %}
+              <img src="{{ video.thumbnail_url }}" class="thumb-mini" alt="">
+              {% else %}
+              <div class="thumb-mini-placeholder">🎬</div>
+              {% endif %}
+            </td>
+            <td>
+              <div style="font-weight:600;">{{ video.title }}</div>
+              {% if video.is_featured %}<span class="badge badge-featured" style="font-size:.68rem;">Featured</span>{% endif %}
+            </td>
+            <td>{{ video.genre or '—' }}</td>
+            <td>{{ video.year or '—' }}</td>
+            <td>{{ video.view_count }}</td>
+            <td>
+              <span class="pill {{ 'pill-green' if video.is_published else 'pill-red' }}">
+                {{ 'Published' if video.is_published else 'Draft' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-btns">
+                <a href="{{ url_for('videos.watch', video_id=video.id) }}" class="btn btn-ghost btn-sm" target="_blank">▶</a>
+                <a href="{{ url_for('admin.edit_video', video_id=video.id) }}" class="btn btn-ghost btn-sm">Edit</a>
+                <form method="POST" action="{{ url_for('admin.toggle_published', video_id=video.id) }}" style="display:inline;">
+                  <button class="btn btn-ghost btn-sm" type="submit">{{ 'Unpublish' if video.is_published else 'Publish' }}</button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.delete_video', video_id=video.id) }}" style="display:inline;" onsubmit="return confirm('Delete {{ video.title }}?')">
+                  <button class="btn btn-danger btn-sm" type="submit">Del</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted);">No videos yet. <a href="{{ url_for('admin.add_video') }}" style="color:var(--accent);">Add one.</a></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

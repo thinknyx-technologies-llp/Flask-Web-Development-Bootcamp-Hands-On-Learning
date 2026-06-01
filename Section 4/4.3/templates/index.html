@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Flask JSON Demo</title>
+    </head>
+    <body>
+        <h2>Flask JSON Handling</h2>
+
+        <input type="text" id="userInput" placeholder="Type something">
+        <button onclick="sendData()">Send to server</button>
+        <pre id="responseOutput" style="background: #f4f4f4; padding: 10px;"></pre>
+
+
+        <script>
+            async function sendData(){
+                const input = document.getElementById('userInput').value;
+                const output = document.getElementById('responseOutput');
+
+                const response = await fetch('/process', {
+                    method:'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({message: input})
+                });
+                const result = await response.json();
+                output.textContent = JSON.stringify(result, null, 2);
+            }
+        </script>
+    </body>
+</html>

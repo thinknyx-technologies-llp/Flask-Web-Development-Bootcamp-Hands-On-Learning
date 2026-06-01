@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Active Sessions - Flask Auth App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sessions-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    
+    .sessions-table th,
+    .sessions-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .sessions-table th {
+        background: #667eea;
+        color: white;
+    }
+    
+    .sessions-table tr:hover {
+        background: #f5f5f5;
+    }
+    
+    .current-badge {
+        background: #28a745;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    
+    .info-note {
+        background: #e7f3ff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+        border-left: 4px solid #2196f3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>Active Sessions</h2>
+
+{% if sessions %}
+    <table class="sessions-table">
+        <thead>
+            <tr>
+                <th>Session ID</th>
+                <th>Browser/Device</th>
+                <th>IP Address</th>
+                <th>Login Time</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+            <tr>
+                <td>{{ session.session_id[:20] }}...</td>
+                <td>{{ session.browser }}</td>
+                <td>{{ session.ip }}</td>
+                <td>{{ session.login_time }}</td>
+                <td>
+                    {% if session.current %}
+                        <span class="current-badge">Current Session</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="info-note">
+        <strong>Note:</strong> This is a demo showing your current session only. 
+        In a production application, you would see all active sessions across different devices/browsers.
+        You can implement this by storing session tokens in a database table.
+    </div>
+{% else %}
+    <p>No active sessions found.</p>
+{% endif %}
+
+<div style="margin-top: 20px;">
+    <a href="/session-info" class="btn">Back to Session Info</a>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Welcome {{ current_user.username | upper }}</h1>
+
+{% for task in tasks %}
+
+<div class="task-card">
+
+    <h3>{{ task.title }}</h3>
+
+    {% if task.completed %}
+        <p>Completed</p>
+    {% else %}
+        <p>Pending</p>
+    {% endif %}
+
+</div>
+
+{% endfor %}
+
+{% endblock %}

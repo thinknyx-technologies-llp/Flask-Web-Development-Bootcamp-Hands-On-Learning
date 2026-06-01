@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Your Assignments</h2>
+
+{% if assignments %}
+    <ul>
+        {% for assignment in assignments %}
+            <li>
+                {{ assignment.title|capitalize }}
+                -
+                {{ assignment.subject }}
+
+                <a href="/delete/{{ assignment.id }}">Delete</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No assignments found</p>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Account — StreamFlix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0a0a0f;--surface:#12121a;--surface2:#1c1c28;--border:#2a2a3d;--accent:#e50914;--text:#f0f0f5;--muted:#8888aa;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+    .auth-bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 80% 50%, rgba(229,9,20,0.12) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(255,107,53,0.08) 0%, transparent 50%), var(--bg);}
+    .auth-wrap{position:relative;z-index:1;width:100%;max-width:440px;padding:20px;}
+    .auth-logo{text-align:center;margin-bottom:32px;}
+    .auth-logo a{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--accent);letter-spacing:3px;text-decoration:none;}
+    .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:36px;}
+    .auth-card h1{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:1px;margin-bottom:8px;}
+    .auth-card p{color:var(--muted);font-size:0.88rem;margin-bottom:28px;}
+    .form-group{margin-bottom:18px;}
+    .form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;}
+    .form-control{width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.92rem;font-family:inherit;outline:none;transition:border-color 0.2s;}
+    .form-control:focus{border-color:var(--accent);}
+    .btn-full{width:100%;padding:13px;background:var(--accent);color:white;border:none;border-radius:7px;font-size:0.95rem;font-weight:700;font-family:inherit;cursor:pointer;transition:background 0.2s, transform 0.1s;letter-spacing:0.5px;margin-top:8px;}
+    .btn-full:hover{background:#c40812;transform:translateY(-1px);}
+    .auth-footer{text-align:center;margin-top:24px;font-size:0.85rem;color:var(--muted);}
+    .auth-footer a{color:var(--accent);font-weight:600;}
+    .flash-container{margin-bottom:16px;}
+    .flash{padding:10px 16px;border-radius:7px;font-size:0.85rem;font-weight:500;border:1px solid transparent;margin-bottom:8px;}
+    .flash.error{background:rgba(229,9,20,0.1);border-color:var(--accent);color:#ff8080;}
+    .flash.success{background:rgba(34,197,94,0.1);border-color:#22c55e;color:#22c55e;}
+  </style>
+</head>
+<body>
+<div class="auth-bg"></div>
+<div class="auth-wrap">
+  <div class="auth-logo"><a href="/">STREAMFLIX</a></div>
+  <div class="auth-card">
+    <h1>Create Account</h1>
+    <p>Start watching in seconds</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+      {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="form-group">
+        <label>Username</label>
+        <input class="form-control" type="text" name="username" required placeholder="johndoe" autofocus>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input class="form-control" type="email" name="email" required placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input class="form-control" type="password" name="password" required placeholder="Min. 8 characters">
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input class="form-control" type="password" name="confirm_password" required placeholder="Repeat password">
+      </div>
+      <button class="btn-full" type="submit">CREATE ACCOUNT</button>
+    </form>
+    <div class="auth-footer">
+      Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

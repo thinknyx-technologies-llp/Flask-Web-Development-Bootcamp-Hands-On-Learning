@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if video else 'Add' }} Video — Admin{% endblock %}
+
+{% block head %}
+<style>
+  .admin-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px);}
+  .admin-sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;}
+  .sidebar-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);padding:0 28px;margin-bottom:4px;}
+  .sidebar-link{display:flex;align-items:center;gap:10px;padding:9px 28px;font-size:.88rem;font-weight:500;color:var(--muted);transition:all .15s;text-decoration:none;margin-bottom:2px;}
+  .sidebar-link:hover,.sidebar-link.active{background:var(--surface2);color:var(--text);}
+  .sidebar-link.active{color:var(--accent);}
+  .admin-main{padding:32px;}
+  .page-header{display:flex;align-items:center;gap:16px;margin-bottom:32px;}
+  .page-header h1{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;}
+  .form-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;max-width:760px;}
+  .section-divider{border:none;border-top:1px solid var(--border);margin:28px 0;}
+  .section-sub{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:16px;}
+  .file-input-wrap{position:relative;}
+  .file-input-wrap input[type=file]{opacity:0;position:absolute;inset:0;cursor:pointer;width:100%;height:100%;}
+  .file-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:36px;border:2px dashed var(--border);border-radius:8px;color:var(--muted);font-size:.9rem;transition:border-color .2s,color .2s;cursor:pointer;}
+  .file-btn:hover{border-color:var(--accent);color:var(--text);}
+  .form-footer{display:flex;align-items:center;gap:12px;margin-top:28px;padding-top:24px;border-top:1px solid var(--border);}
+  select.form-control option{background:var(--surface2);}
+  @media(max-width:768px){.admin-layout{grid-template-columns:1fr;}.admin-sidebar{display:none;}.form-row{grid-template-columns:1fr!important;}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div style="padding:0 28px 20px;">
+      <div style="font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Admin Panel</div>
+      <div style="font-size:.92rem;font-weight:600;">{{ current_user.username }}</div>
+    </div>
+    <div style="margin-bottom:8px;">
+      <div class="sidebar-label">Content</div>
+      <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">📊 Dashboard</a>
+      <a href="{{ url_for('admin.videos') }}" class="sidebar-link">🎬 Videos</a>
+      <a href="{{ url_for('admin.add_video') }}" class="sidebar-link active">➕ Add Video</a>
+    </div>
+    <div>
+      <div class="sidebar-label">Users</div>
+      <a href="{{ url_for('admin.users') }}" class="sidebar-link">👥 All Users</a>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="page-header">
+      <a href="{{ url_for('admin.videos') }}" class="btn btn-ghost btn-sm">← Back</a>
+      <h1>{{ 'Edit Video' if video else 'Add New Video' }}</h1>
+    </div>
+
+    <div class="form-card">
+      <form method="POST" enctype="multipart/form-data">
+        <div class="section-sub">Video Details</div>
+        <div class="form-group">
+          <label>Title *</label>
+          <input class="form-control" type="text" name="title" required placeholder="Enter video title" value="{{ video.title if video else '' }}">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="form-control" name="description" placeholder="Short description of the video…">{{ video.description if video else '' }}</textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Genre</label>
+            <select class="form-control" name="genre">
+              <option value="">— Select Genre —</option>
+              {% for g in ['Action','Comedy','Drama','Horror','Sci-Fi','Romance','Thriller','Documentary','Animation','Fantasy','Mystery','Crime'] %}
+              <option value="{{ g }}" {{ 'selected' if video and video.genre == g }}>{{ g }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Rating</label>
+            <select class="form-control" name="rating">
+              <option value="">— Select Rating —</option>
+              {% for r in ['G','PG','PG-13','R','NC-17','TV-Y','TV-G','TV-PG','TV-14','TV-MA'] %}
+              <option value="{{ r }}" {{ 'selected' if video and video.rating == r }}>{{ r }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Release Year</label>
+            <input class="form-control" type="number" name="year" placeholder="e.g. 2024" min="1900" max="2099" value="{{ video.year if video and video.year else '' }}">
+          </div>
+          <div class="form-group">
+            <label>Duration (minutes)</label>
+            <input class="form-control" type="number" name="duration" placeholder="e.g. 120" min="1" value="{{ video.duration_minutes if video and video.duration_minutes else '' }}">
+          </div>
+        </div>
+
+        <hr class="section-divider">
+        <div class="section-sub">Upload Files</div>
+
+        {% if not video %}
+        <div class="form-group">
+          <label>Video File * (MP4, WebM, etc.)</label>
+          <div class="file-input-wrap">
+            <div class="file-btn" id="videoLabel">🎬 Click to select video file</div>
+            <input type="file" name="video_file" accept="video/*" required onchange="updateLabel(this, 'videoLabel')">
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label>Thumbnail Image {% if video %}(leave empty to keep current){% endif %} (JPG, PNG)</label>
+          <div class="file-input-wrap">
+            <div class="file-btn" id="thumbLabel">🖼 Click to select thumbnail</div>
+            <input type="file" name="thumbnail_file" accept="image/*" onchange="updateLabel(this, 'thumbLabel')">
+          </div>
+        </div>
+
+        <hr class="section-divider">
+        <div class="section-sub">Visibility</div>
+        <div style="display:flex;gap:32px;">
+          <label class="form-check">
+            <input type="checkbox" name="is_published" {{ 'checked' if not video or video.is_published }}>
+            <span>Published (visible to users)</span>
+          </label>
+          <label class="form-check">
+            <input type="checkbox" name="is_featured" {{ 'checked' if video and video.is_featured }}>
+            <span>Featured on homepage</span>
+          </label>
+        </div>
+
+        <div class="form-footer">
+          <button class="btn btn-primary" type="submit">{{ '💾 Save Changes' if video else '✓ Upload & Add Video' }}</button>
+          <a href="{{ url_for('admin.videos') }}" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateLabel(input, labelId) {
+  const label = document.getElementById(labelId);
+  if (input.files && input.files[0]) {
+    const f = input.files[0];
+    const size = (f.size / 1024 / 1024).toFixed(1);
+    label.textContent = `✓ ${f.name} (${size} MB)`;
+    label.style.borderColor = 'var(--accent)';
+    label.style.color = 'var(--text)';
+  }
+}
+</script>
+{% endblock %}

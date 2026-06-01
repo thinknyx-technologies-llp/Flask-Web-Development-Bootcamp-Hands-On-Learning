@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}{{ video.title }} — StreamFlix{% endblock %}
+
+{% block head %}
+<style>
+  .player-section { background: #000; }
+  .player-wrap { max-width: 1100px; margin: 0 auto; }
+  .video-player {
+    width: 100%; aspect-ratio: 16/9; display: block;
+    background: #000;
+  }
+  .watch-layout { display: grid; grid-template-columns: 1fr 320px; gap: 32px; padding: 32px 48px; max-width: 1400px; margin: 0 auto; }
+  .video-info h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.6rem; letter-spacing: 1px; margin-bottom: 12px; }
+  .meta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+  .meta-row span { font-size: 0.85rem; color: var(--muted); }
+  .meta-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
+  .video-desc { color: rgba(240,240,245,0.8); font-size: 0.95rem; line-height: 1.7; }
+  .actions-row { display: flex; gap: 12px; margin: 24px 0; }
+  .views-badge { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--muted); }
+  .player-error {
+    display: none; margin: 12px auto 0; max-width: 1100px;
+    color: #ffb4b4; background: rgba(229,9,20,0.14);
+    border: 1px solid rgba(229,9,20,0.45); border-radius: 6px;
+    padding: 10px 12px; font-size: 0.86rem;
+  }
+
+  .related-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 1px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .related-card { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer; transition: background 0.15s; border-radius: 6px; }
+  .related-card:hover { background: var(--surface2); padding-left: 8px; }
+  .related-thumb { flex: 0 0 100px; aspect-ratio: 16/9; overflow: hidden; border-radius: 5px; background: var(--surface2); }
+  .related-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .related-info { flex: 1; }
+  .related-info h4 { font-size: 0.85rem; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
+  .related-info p { font-size: 0.75rem; color: var(--muted); }
+
+  @media(max-width: 900px){
+    .watch-layout { grid-template-columns: 1fr; padding: 20px; }
+    .video-info h1 { font-size: 2rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="player-section">
+  <div class="player-wrap">
+    <video
+      class="video-player"
+      id="mainPlayer"
+      controls
+      preload="metadata"
+      poster="{{ thumbnail_url or '' }}"
+    >
+      <source src="{{ direct_stream_url }}" type="{{ video_content_type }}">
+      Your browser doesn't support HTML5 video.
+    </video>
+    <div class="player-error" id="playerError"></div>
+  </div>
+</div>
+
+<div class="watch-layout">
+  <div class="video-info">
+    <h1>{{ video.title }}</h1>
+    <div class="meta-row">
+      {% if video.year %}<span>{{ video.year }}</span><span class="meta-dot"></span>{% endif %}
+      {% if video.rating %}<span class="badge badge-genre">{{ video.rating }}</span>{% endif %}
+      {% if video.duration_minutes %}<span>{{ video.duration_minutes }} min</span><span class="meta-dot"></span>{% endif %}
+      {% if video.genre %}<span class="badge badge-genre">{{ video.genre }}</span>{% endif %}
+    </div>
+
+    <div class="views-badge">
+      <span>👁</span> <span>{{ video.view_count }} view{{ 's' if video.view_count != 1 }}</span>
+    </div>
+
+    {% if video.description %}
+    <p class="video-desc" style="margin-top:16px;">{{ video.description }}</p>
+    {% endif %}
+
+    <div class="actions-row">
+      <button class="btn btn-ghost" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+      <a href="{{ stream_url }}" class="btn btn-ghost" target="_blank">Open Stream</a>
+      <a href="{{ direct_stream_url }}" class="btn btn-ghost" target="_blank">Try Direct S3</a>
+      <a href="{{ url_for('videos.debug_video', video_id=video.id) }}" class="btn btn-ghost" target="_blank">Debug</a>
+      <a href="{{ url_for('main.browse') }}" class="btn btn-ghost">← Back</a>
+    </div>
+  </div>
+
+  <!-- RELATED -->
+  <div class="related-panel">
+    {% if related %}
+    <div class="related-title">More Like This</div>
+    {% for v in related %}
+    <a href="{{ url_for('videos.watch', video_id=v.id) }}" style="display:block;text-decoration:none;color:inherit;">
+      <div class="related-card">
+        <div class="related-thumb">
+          {% if v.thumbnail_url %}<img src="{{ v.thumbnail_url }}" alt="{{ v.title }}">
+          {% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🎬</div>{% endif %}
+        </div>
+        <div class="related-info">
+          <h4>{{ v.title }}</h4>
+          <p>{% if v.genre %}{{ v.genre }}{% endif %}{% if v.year %} · {{ v.year }}{% endif %}</p>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const player = document.getElementById('mainPlayer');
+  const playerError = document.getElementById('playerError');
+  const directStreamUrl = {{ direct_stream_url|tojson }};
+  const proxyStreamUrl = {{ stream_url|tojson }};
+  let usingProxyFallback = false;
+
+  player.addEventListener('error', () => {
+    const code = player.error ? player.error.code : 'unknown';
+    const messages = {
+      1: 'Playback was aborted.',
+      2: 'The browser could not download the video.',
+      3: 'The video file is damaged or encoded in an unsupported way.',
+      4: 'This video format or codec is not supported by the browser.'
+    };
+
+    if (!usingProxyFallback && player.currentSrc === directStreamUrl) {
+      usingProxyFallback = true;
+      playerError.textContent = 'Direct S3 playback failed. Trying the Flask stream...';
+      playerError.style.display = 'block';
+      player.src = proxyStreamUrl;
+      player.load();
+      return;
+    }
+
+    playerError.textContent = `${messages[code] || 'The browser could not play this video.'} If Direct S3 and Open Stream both fail, re-encode as MP4 with H.264 video and AAC audio.`;
+    playerError.style.display = 'block';
+  });
+
+  player.addEventListener('stalled', () => {
+    playerError.textContent = 'The browser started loading but the stream stalled. If this stays stuck, the file is probably not browser-compatible or the S3 response is too slow.';
+    playerError.style.display = 'block';
+  });
+
+  player.addEventListener('canplay', () => {
+    playerError.style.display = 'none';
+  });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      player.requestFullscreen().catch(err => console.error(err));
+    } else {
+      document.exitFullscreen();
+    }
+  }
+</script>
+{% endblock %}

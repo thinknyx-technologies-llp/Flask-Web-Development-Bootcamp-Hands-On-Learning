@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Thinknyx  Form</title>
+    </head>
+    <body>
+        <form method="POST" action="{{ url_for('handle_form')}}">
+            <label for="fname">First Name:</label>
+            <input type="text" id="fname" name="fname"><br>
+            <label for="lname">Last Name:</label>
+            <input type="text" id="lname" name="lname"><br>
+            <input type="submit" value="submit">
+        </form>
+    </body>
+</html>

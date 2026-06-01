@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Flask Auth App{% endblock %}
+
+{% block content %}
+<h2>User Dashboard</h2>
+
+<div class="info-card">
+    <h3>Welcome, {{ username }}!</h3>
+    
+    <div class="info-item">
+        <strong>Username:</strong> {{ username }}
+    </div>
+    
+    <div class="info-item">
+        <strong>Email:</strong> {{ email }}
+    </div>
+    
+    <div class="info-item">
+        <strong>Account Status:</strong> Active
+    </div>
+</div>
+
+<div style="margin-top: 30px;">
+    <p>This is your secure dashboard. Only authenticated users can access this page.</p>
+    <a href="/logout" class="btn" style="background: #dc3545; margin-top: 20px;">Logout</a>
+</div>
+{% endblock %}

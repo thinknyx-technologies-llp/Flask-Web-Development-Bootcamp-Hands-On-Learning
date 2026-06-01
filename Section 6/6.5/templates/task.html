@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %} Task Dashboard {% endblock %}
+{% block content %}
+    <h2>Daily Project Tasks</h2>
+    {% if user_role ==  "admin" %}
+        <p style="color: green;"><strong>Admin Access:</strong> You can edit these tasks</p>
+    {% else %}
+        <p><strong>Standard View:</strong> Read-Only mode</p>
+    {% endif %}
+    <table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: #eee;">
+                <th>#</th>
+                <th>Task Name</th>
+                <th>Priority</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <td>
+                    {{ loop.index }}
+                </td>
+                <td>
+                    {{ task.name }}
+                </td>
+                <td style="font-weight: bold;">
+                    {% if task.priority == "High" %}
+                        <span style="color: red;">{{ task.priority }}</span>
+                    {% elif task.priority == "Medium" %}
+                        <span style="color: orange;">{{ task.priority}}</span>
+                    {% else %}
+                        <span style="color: blue;">{{ task.priority }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ "completed" if task.done else "Pending"}}
+                </td>
+            </tr>
+            {% else %}
+                <tr><td colcpan="4">
+                    No tasks assigned for today
+                </td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>Total tasks to manage: {{ tasks | length }}</p>
+{% endblock %}

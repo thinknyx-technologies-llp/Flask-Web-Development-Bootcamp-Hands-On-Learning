@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — StreamFlix{% endblock %}
+
+{% block head %}
+<style>
+  .admin-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 64px); }
+  .admin-sidebar {
+    background: var(--surface); border-right: 1px solid var(--border);
+    padding: 24px 0; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto;
+  }
+  .sidebar-section { padding: 0 16px; margin-bottom: 8px; }
+  .sidebar-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); padding: 0 12px; margin-bottom: 4px; }
+  .sidebar-link {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+    border-radius: 7px; font-size: 0.88rem; font-weight: 500; color: var(--muted);
+    transition: all 0.15s; text-decoration: none; margin-bottom: 2px;
+  }
+  .sidebar-link:hover, .sidebar-link.active { background: var(--surface2); color: var(--text); }
+  .sidebar-link.active { color: var(--accent); }
+  .admin-main { padding: 32px; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+  .page-header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 1px; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .stat-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 1px; }
+  .stat-card:nth-child(1) .stat-value { color: var(--accent); }
+  .stat-card:nth-child(2) .stat-value { color: #60a5fa; }
+  .stat-card:nth-child(3) .stat-value { color: #22c55e; }
+  .stat-card:nth-child(4) .stat-value { color: var(--accent2); }
+
+  /* TABLES */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-header h3 { font-size: 0.95rem; font-weight: 700; }
+  .card-body { padding: 0; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  @media(max-width:1000px){ .stats-grid{grid-template-columns:1fr 1fr;} .two-col{grid-template-columns:1fr;} }
+  @media(max-width:768px){ .admin-layout{grid-template-columns:1fr;} .admin-sidebar{display:none;} }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div style="padding:0 16px 20px;">
+      <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Admin Panel</div>
+      <div style="font-size:0.92rem;font-weight:600;">{{ current_user.username }}</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Content</div>
+      <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link {{ 'active' if request.endpoint == 'admin.dashboard' }}">📊 Dashboard</a>
+      <a href="{{ url_for('admin.videos') }}" class="sidebar-link {{ 'active' if request.endpoint == 'admin.videos' }}">🎬 Videos</a>
+      <a href="{{ url_for('admin.add_video') }}" class="sidebar-link {{ 'active' if request.endpoint == 'admin.add_video' }}">➕ Add Video</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Users</div>
+      <a href="{{ url_for('admin.users') }}" class="sidebar-link {{ 'active' if request.endpoint == 'admin.users' }}">👥 All Users</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Site</div>
+      <a href="{{ url_for('main.index') }}" class="sidebar-link">🏠 View Site</a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-link">🚪 Sign Out</a>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <a href="{{ url_for('admin.add_video') }}" class="btn btn-primary">+ Add Video</a>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Videos</div>
+        <div class="stat-value">{{ total_videos }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value">{{ total_users }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Published</div>
+        <div class="stat-value">{{ published }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Views</div>
+        <div class="stat-value">{{ total_views }}</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Videos</h3>
+          <a href="{{ url_for('admin.videos') }}" class="btn btn-ghost btn-sm">View All</a>
+        </div>
+        <div class="card-body">
+          <table>
+            <thead><tr><th>Title</th><th>Status</th><th>Views</th></tr></thead>
+            <tbody>
+              {% for v in recent_videos %}
+              <tr>
+                <td>{{ v.title }}</td>
+                <td><span class="pill {{ 'pill-green' if v.is_published else 'pill-red' }}">{{ 'Live' if v.is_published else 'Draft' }}</span></td>
+                <td>{{ v.view_count }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Users</h3>
+          <a href="{{ url_for('admin.users') }}" class="btn btn-ghost btn-sm">View All</a>
+        </div>
+        <div class="card-body">
+          <table>
+            <thead><tr><th>Username</th><th>Role</th><th>Joined</th></tr></thead>
+            <tbody>
+              {% for u in recent_users %}
+              <tr>
+                <td>{{ u.username }}</td>
+                <td><span class="pill {{ 'pill-yellow' if u.is_admin else 'pill-green' }}">{{ 'Admin' if u.is_admin else 'User' }}</span></td>
+                <td>{{ u.created_at.strftime('%b %d') }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

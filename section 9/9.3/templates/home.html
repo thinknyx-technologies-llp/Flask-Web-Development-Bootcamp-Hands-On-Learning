@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Flask Auth App{% endblock %}
+
+{% block content %}
+<div style="text-align: center;">
+    <h1>Welcome to Flask Authentication App</h1>
+    <p style="margin: 20px 0; color: #666; font-size: 18px;">A secure authentication system with Role-Based Access Control (RBAC)</p>
+    
+    {% if not session.user_id %}
+        <div style="margin-top: 30px;">
+            <a href="/register" class="btn" style="margin-right: 10px; background: #28a745;">Get Started</a>
+            <a href="/login" class="btn" style="background: #667eea;">Login</a>
+        </div>
+    {% else %}
+        <div class="info-card">
+            <h2>Welcome back, {{ session.username }}!</h2>
+            <p>You are logged in as <strong>{{ session.role_name|upper if session.role_name else 'USER' }}</strong></p>
+            <p>Your role has specific permissions and access levels.</p>
+            <a href="/dashboard" class="btn" style="margin-top: 10px;">Go to Dashboard</a>
+        </div>
+    {% endif %}
+    
+    <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div class="info-card">
+            <h3>🔐 Secure Authentication</h3>
+            <p>Password hashing, session management, and secure login system</p>
+        </div>
+        
+        <div class="info-card">
+            <h3>👥 Role-Based Access</h3>
+            <p>Admin, Manager, User, and Viewer roles with different permissions</p>
+        </div>
+        
+        <div class="info-card">
+            <h3>📊 Permission Control</h3>
+            <p>Fine-grained permissions for each role to control access</p>
+        </div>
+        
+        <div class="info-card">
+            <h3>💾 SQLite Database</h3>
+            <p>Local database storage for users, roles, and permissions</p>
+        </div>
+    </div>
+    
+    <div style="margin-top: 40px; background: #e7f3ff; padding: 20px; border-radius: 8px;">
+        <h3>📝 Demo Credentials</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+            <div>
+                <strong>👑 Admin:</strong><br>
+                Username: admin<br>
+                Password: admin123
+            </div>
+            <div>
+                <strong>📋 Manager:</strong><br>
+                Username: manager<br>
+                Password: manager123
+            </div>
+            <div>
+                <strong>👤 User:</strong><br>
+                Username: user<br>
+                Password: user123
+            </div>
+        </div>
+        <p style="margin-top: 15px; font-size: 14px; color: #666;">⚠️ These are demo credentials. In production, change them immediately!</p>
+    </div>
+</div>
+{% endblock %}

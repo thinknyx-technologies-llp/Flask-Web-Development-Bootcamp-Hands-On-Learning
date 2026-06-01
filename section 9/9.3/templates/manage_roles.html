@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Roles - Flask Auth App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .roles-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .role-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        border: 1px solid #dee2e6;
+    }
+    .role-card h3 {
+        margin-bottom: 10px;
+        color: #667eea;
+    }
+    .permission-group {
+        margin: 15px 0;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .permission-checkbox {
+        margin: 8px 0;
+    }
+    .permission-checkbox label {
+        margin-left: 8px;
+        font-weight: normal;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>Role Management</h2>
+
+<div class="roles-container">
+    {% for role in roles %}
+    <div class="role-card">
+        <h3>{{ role.role_name|title }}</h3>
+        <p style="color: #666; margin-bottom: 15px;">{{ role.description }}</p>
+        
+        <form method="POST" action="/admin/roles/{{ role.id }}/permissions">
+            <h4>Permissions:</h4>
+            <div class="permission-group">
+                {% for permission in permissions %}
+                <div class="permission-checkbox">
+                    <input type="checkbox" 
+                           name="permissions" 
+                           value="{{ permission.id }}"
+                           id="perm_{{ role.id }}_{{ permission.id }}"
+                           {% if permission.permission_name in role_permissions[role.id] %}checked{% endif %}>
+                    <label for="perm_{{ role.id }}_{{ permission.id }}">
+                        {{ permission.permission_name.replace('_', ' ').title() }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn">Update Permissions</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

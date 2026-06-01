@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Users — Admin{% endblock %}
+
+{% block head %}
+<style>
+  .admin-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px);}
+  .admin-sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;}
+  .sidebar-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);padding:0 28px;margin-bottom:4px;}
+  .sidebar-link{display:flex;align-items:center;gap:10px;padding:9px 28px;font-size:.88rem;font-weight:500;color:var(--muted);transition:all .15s;text-decoration:none;margin-bottom:2px;}
+  .sidebar-link:hover,.sidebar-link.active{background:var(--surface2);color:var(--text);}
+  .sidebar-link.active{color:var(--accent);}
+  .admin-main{padding:32px;}
+  .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+  .page-header h1{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;}
+  @media(max-width:768px){.admin-layout{grid-template-columns:1fr;}.admin-sidebar{display:none;}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div style="padding:0 28px 20px;">
+      <div style="font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Admin Panel</div>
+      <div style="font-size:.92rem;font-weight:600;">{{ current_user.username }}</div>
+    </div>
+    <div style="margin-bottom:8px;">
+      <div class="sidebar-label">Content</div>
+      <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">📊 Dashboard</a>
+      <a href="{{ url_for('admin.videos') }}" class="sidebar-link">🎬 Videos</a>
+      <a href="{{ url_for('admin.add_video') }}" class="sidebar-link">➕ Add Video</a>
+    </div>
+    <div>
+      <div class="sidebar-label">Users</div>
+      <a href="{{ url_for('admin.users') }}" class="sidebar-link active">👥 All Users</a>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="page-header">
+      <h1>Users <span style="font-size:1rem;font-family:'DM Sans';color:var(--muted);font-weight:400;">{{ users|length }} registered</span></h1>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="user-avatar">{{ user.username[0].upper() }}</div>
+                <span style="font-weight:600;">{{ user.username }}</span>
+                {% if user.id == current_user.id %}<span class="pill pill-yellow" style="font-size:.68rem;">You</span>{% endif %}
+              </div>
+            </td>
+            <td style="color:var(--muted);">{{ user.email }}</td>
+            <td>
+              <span class="pill {{ 'pill-yellow' if user.is_admin else 'pill-green' }}">
+                {{ 'Admin' if user.is_admin else 'User' }}
+              </span>
+            </td>
+            <td style="color:var(--muted);">{{ user.created_at.strftime('%b %d, %Y') }}</td>
+            <td>
+              {% if user.id != current_user.id %}
+              <form method="POST" action="{{ url_for('admin.toggle_admin', user_id=user.id) }}" style="display:inline;">
+                <button class="btn btn-ghost btn-sm" type="submit">
+                  {{ 'Remove Admin' if user.is_admin else 'Make Admin' }}
+                </button>
+              </form>
+              {% else %}
+              <span style="color:var(--muted);font-size:.82rem;">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

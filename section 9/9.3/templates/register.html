@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Flask Auth App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .password-strength {
+        margin-top: 5px;
+        font-size: 12px;
+    }
+    
+    .strength-weak {
+        color: #dc3545;
+    }
+    
+    .strength-medium {
+        color: #ffc107;
+    }
+    
+    .strength-strong {
+        color: #28a745;
+    }
+    
+    .requirements {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+        font-size: 12px;
+    }
+    
+    .requirements ul {
+        margin-left: 20px;
+        margin-top: 5px;
+    }
+    
+    .requirements li {
+        margin: 5px 0;
+    }
+    
+    .requirements li.valid {
+        color: #28a745;
+        text-decoration: line-through;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <h2>Create New Account</h2>
+    <p style="color: #666; margin-bottom: 20px;">Join us today! It's quick and easy.</p>
+    
+    <form method="POST" action="/register" id="registerForm">
+        <div class="form-group">
+            <label for="username">👤 Username:</label>
+            <input type="text" id="username" name="username" required 
+                   placeholder="Choose a username" minlength="3" maxlength="50">
+            <small style="color: #666;">3-50 characters</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">📧 Email:</label>
+            <input type="email" id="email" name="email" required 
+                   placeholder="your@email.com">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">🔒 Password:</label>
+            <input type="password" id="password" name="password" required 
+                   placeholder="Choose a strong password">
+            <div id="passwordStrength" class="password-strength"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="confirm_password">✓ Confirm Password:</label>
+            <input type="password" id="confirm_password" name="confirm_password" required 
+                   placeholder="Confirm your password">
+            <div id="passwordMatch" style="font-size: 12px; margin-top: 5px;"></div>
+        </div>
+        
+        <div class="requirements">
+            <strong>Password Requirements:</strong>
+            <ul>
+                <li id="req-length">✓ At least 6 characters long</li>
+                <li id="req-upper">✓ At least one uppercase letter</li>
+                <li id="req-lower">✓ At least one lowercase letter</li>
+                <li id="req-number">✓ At least one number</li>
+            </ul>
+        </div>
+        
+        <button type="submit" style="width: 100%;">Register Account</button>
+    </form>
+    
+    <hr>
+    
+    <p style="text-align: center;">
+        Already have an account? <a href="/login" style="color: #667eea;">Login here</a>
+    </p>
+</div>
+
+<script>
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('confirm_password');
+    const passwordStrength = document.getElementById('passwordStrength');
+    const passwordMatch = document.getElementById('passwordMatch');
+    
+    // Password strength checker
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        
+        // Length check
+        if (password.length >= 6) {
+            strength++;
+            document.getElementById('req-length').style.color = '#28a745';
+        } else {
+            document.getElementById('req-length').style.color = '#dc3545';
+        }
+        
+        // Uppercase check
+        if (/[A-Z]/.test(password)) {
+            strength++;
+            document.getElementById('req-upper').style.color = '#28a745';
+        } else {
+            document.getElementById('req-upper').style.color = '#dc3545';
+        }
+        
+        // Lowercase check
+        if (/[a-z]/.test(password)) {
+            strength++;
+            document.getElementById('req-lower').style.color = '#28a745';
+        } else {
+            document.getElementById('req-lower').style.color = '#dc3545';
+        }
+        
+        // Number check
+        if (/[0-9]/.test(password)) {
+            strength++;
+            document.getElementById('req-number').style.color = '#28a745';
+        } else {
+            document.getElementById('req-number').style.color = '#dc3545';
+        }
+        
+        // Display strength
+        if (password.length === 0) {
+            passwordStrength.innerHTML = '';
+        } else if (strength <= 2) {
+            passwordStrength.innerHTML = '<span class="strength-weak">Weak password</span>';
+        } else if (strength === 3) {
+            passwordStrength.innerHTML = '<span class="strength-medium">Medium password</span>';
+        } else {
+            passwordStrength.innerHTML = '<span class="strength-strong">Strong password!</span>';
+        }
+        
+        return strength === 4;
+    }
+    
+    // Check password match
+    function checkPasswordMatch() {
+        const password = passwordInput.value;
+        const confirm = confirmInput.value;
+        
+        if (confirm.length === 0) {
+            passwordMatch.innerHTML = '';
+        } else if (password === confirm) {
+            passwordMatch.innerHTML = '<span style="color: #28a745;">✓ Passwords match</span>';
+            return true;
+        } else {
+            passwordMatch.innerHTML = '<span style="color: #dc3545;">✗ Passwords do not match</span>';
+            return false;
+        }
+        return false;
+    }
+    
+    // Real-time validation
+    passwordInput.addEventListener('input', function() {
+        checkPasswordStrength(this.value);
+        checkPasswordMatch();
+    });
+    
+    confirmInput.addEventListener('input', checkPasswordMatch);
+    
+    // Form submission validation
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        const isStrong = checkPasswordStrength(passwordInput.value);
+        const isMatch = checkPasswordMatch();
+        
+        if (!isStrong) {
+            e.preventDefault();
+            alert('Please choose a stronger password meeting all requirements!');
+        } else if (!isMatch) {
+            e.preventDefault();
+            alert('Passwords do not match!');
+        }
+    });
+</script>
+{% endblock %}

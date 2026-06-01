@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Browse — StreamFlix{% endblock %}
+
+{% block head %}
+<style>
+  .browse-header { padding: 40px 48px 0; }
+  .browse-header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 2px; }
+  .filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+  .filter-pill {
+    padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+    border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
+    background: var(--surface2); color: var(--muted); text-decoration: none;
+  }
+  .filter-pill:hover, .filter-pill.active { background: var(--accent); border-color: var(--accent); color: white; }
+  .result-count { padding: 16px 48px; color: var(--muted); font-size: 0.85rem; }
+  .no-results { text-align: center; padding: 100px 20px; color: var(--muted); }
+
+  @media(max-width:768px){ .browse-header{padding:24px 20px 0;} .result-count{padding:12px 20px;} }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="browse-header">
+  <h1>{% if search %}Search: "{{ search }}"{% elif selected_genre %}{{ selected_genre }}{% else %}Browse All{% endif %}</h1>
+  <div class="filters">
+    <a href="{{ url_for('main.browse') }}" class="filter-pill {{ 'active' if not selected_genre and not search }}">All</a>
+    {% for genre in genres %}
+    <a href="{{ url_for('main.browse', genre=genre) }}" class="filter-pill {{ 'active' if selected_genre == genre }}">{{ genre }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="result-count">
+  {% if videos %}{{ videos|length }} title{{ 's' if videos|length != 1 }} found{% endif %}
+</div>
+
+<div class="section" style="padding-top:0;">
+  {% if videos %}
+  <div class="video-grid">
+    {% for video in videos %}
+    <a href="{{ url_for('videos.watch', video_id=video.id) }}">
+      <div class="video-card">
+        {% if video.thumbnail_url %}
+        <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}">
+        {% else %}
+        <div class="video-card-placeholder">🎬</div>
+        {% endif %}
+        <div class="video-card-overlay"><div class="play-btn-circle">▶</div></div>
+        <div class="video-card-info">
+          <div class="video-card-title">{{ video.title }}</div>
+          <div class="video-card-meta">
+            {% if video.genre %}<span>{{ video.genre }}</span>{% endif %}
+            {% if video.year %}<span>{{ video.year }}</span>{% endif %}
+            {% if video.rating %}<span>{{ video.rating }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="no-results">
+    <div style="font-size:3rem;margin-bottom:16px;">🔍</div>
+    <h2 style="font-family:'Bebas Neue';font-size:2rem;margin-bottom:8px;">No Results</h2>
+    <p>Try a different search or genre filter.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

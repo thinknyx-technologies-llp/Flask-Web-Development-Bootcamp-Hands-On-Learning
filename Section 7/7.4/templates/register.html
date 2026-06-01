@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Flask-WTF validation</title>
+        <style>
+            .error {
+                color: red;
+                font-size: 0.8em;
+            }
+            .flash {
+                background: #d4edda;
+                padding: 10px;
+                margin-bottom: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Create an Account</h2>
+        {% with message = get_flashed_messages() %}
+            {% if message %}
+                {% for message in message %}
+                <div class="flash">{{message}}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <div>
+                {{ form.username.label}} <br>
+                {{ form.username()}}
+                {% for error in form.username.errors %}
+                    <span class="error">[{{error}}]</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.email.label}} <br>
+                {{ form.email()}}
+                {% for error in form.email.errors %}
+                    <span class="error">[{{error}}]</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.password.label}} <br>
+                {{ form.password()}}
+                {% for error in form.password.errors %}
+                    <span class="error">[{{error}}]</span>
+                {% endfor %}
+            </div>
+            <p>{{ form.submit() }}</p>
+        </form>
+    </body>
+</html>

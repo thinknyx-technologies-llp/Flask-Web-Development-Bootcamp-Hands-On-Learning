@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - Flask Auth App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 48px;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+    .stat-label {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+    .distribution-list {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    .distribution-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>System Reports</h2>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-number">{{ total_users }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Active Users</div>
+        <div class="stat-number">{{ active_users }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Inactive Users</div>
+        <div class="stat-number">{{ total_users - active_users }}</div>
+    </div>
+</div>
+
+<h3>Role Distribution</h3>
+<div class="distribution-list">
+    {% for role in role_distribution %}
+    <div class="distribution-item">
+        <strong>{{ role.role_name|title }}</strong>
+        <span>{{ role.count }} users ({{ (role.count / total_users * 100)|round(1) }}%)</span>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %} User Profile {% endblock %}
+
+{% block content %}
+<h1>Welcome back, {{user.name}}</h1>
+<p>Designation: <strong>{{user.role}}</strong></p>
+<h3>Template Rendering </h3>
+<p>Your current tech stack:</p>
+<ul>
+    {% for skill in user.skills %}
+        <li>{{skill}}</li>
+    {% else %}
+        <li>No skills listed yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

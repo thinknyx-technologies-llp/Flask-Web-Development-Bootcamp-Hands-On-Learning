@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Flask Auth App{% endblock %}
+
+{% block content %}
+<div style="text-align: center;">
+    <h1>Welcome to Flask Authentication App</h1>
+    <p style="margin: 20px 0; color: #666;">A secure authentication system built with Flask and SQLite</p>
+    
+    {% if not session.user_id %}
+        <div style="margin-top: 30px;">
+            <a href="/register" class="btn" style="margin-right: 10px;">Get Started</a>
+            <a href="/login" class="btn" style="background: #48bb78;">Login</a>
+        </div>
+    {% else %}
+        <div class="info-card">
+            <h2>Welcome back, {{ session.username }}!</h2>
+            <p>You are logged in to your account.</p>
+            <a href="/dashboard" class="btn" style="margin-top: 10px;">Go to Dashboard</a>
+        </div>
+    {% endif %}
+    
+</div>
+{% endblock %}

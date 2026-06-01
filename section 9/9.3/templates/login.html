@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Flask Auth App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        max-width: 450px;
+        margin: 0 auto;
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .remember-me {
+        display: flex;
+        align-items: center;
+        margin: 15px 0;
+    }
+    
+    .remember-me input {
+        width: auto;
+        margin-right: 10px;
+        margin-top: 0;
+    }
+    
+    .remember-me label {
+        margin-bottom: 0;
+        font-weight: normal;
+    }
+    
+    .forgot-password {
+        text-align: right;
+        margin-top: -10px;
+        margin-bottom: 15px;
+    }
+    
+    .forgot-password a {
+        color: #667eea;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    
+    .demo-credentials {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+        font-size: 13px;
+    }
+    
+    .demo-credentials h4 {
+        margin-bottom: 10px;
+        color: #667eea;
+    }
+    
+    .demo-item {
+        display: inline-block;
+        margin: 5px 10px;
+        padding: 5px 10px;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .demo-item:hover {
+        background: #667eea;
+        color: white;
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-header">
+        <h2>Welcome Back!</h2>
+        <p style="color: #666;">Please login to your account</p>
+    </div>
+    
+    <form method="POST" action="/login">
+        <div class="form-group">
+            <label for="username">👤 Username:</label>
+            <input type="text" id="username" name="username" required 
+                   placeholder="Enter your username" autofocus>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">🔒 Password:</label>
+            <input type="password" id="password" name="password" required 
+                   placeholder="Enter your password">
+        </div>
+        
+        <div class="remember-me">
+            <input type="checkbox" id="remember" name="remember">
+            <label for="remember">Remember me</label>
+        </div>
+        
+        <div class="forgot-password">
+            <a href="#">Forgot password?</a>
+        </div>
+        
+        <button type="submit" style="width: 100%;">Login</button>
+    </form>
+    
+    <hr>
+    
+    <p style="text-align: center;">
+        Don't have an account? <a href="/register" style="color: #667eea;">Register here</a>
+    </p>
+    
+    <div class="demo-credentials">
+        <h4>📝 Demo Credentials (Click to auto-fill)</h4>
+        <div>
+            <div class="demo-item" onclick="fillCredentials('admin', 'admin123')">
+                👑 Admin
+            </div>
+            <div class="demo-item" onclick="fillCredentials('manager', 'manager123')">
+                📋 Manager
+            </div>
+            <div class="demo-item" onclick="fillCredentials('user', 'user123')">
+                👤 User
+            </div>
+        </div>
+        <p style="margin-top: 10px; font-size: 12px; color: #666;">
+            ⚠️ These are demo accounts. In production, change passwords immediately!
+        </p>
+    </div>
+</div>
+
+<script>
+    function fillCredentials(username, password) {
+        document.getElementById('username').value = username;
+        document.getElementById('password').value = password;
+        
+        // Add visual feedback
+        const demoItem = event.target;
+        demoItem.style.backgroundColor = '#667eea';
+        demoItem.style.color = 'white';
+        setTimeout(() => {
+            demoItem.style.backgroundColor = 'white';
+            demoItem.style.color = '#333';
+        }, 500);
+        
+        // Optional: Auto-submit form
+        // setTimeout(() => {
+        //     document.querySelector('form').submit();
+        // }, 1000);
+    }
+    
+    // Add enter key submission
+    document.querySelector('form').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.submit();
+        }
+    });
+    
+    // Remember me functionality
+    if (localStorage.getItem('rememberedUsername')) {
+        document.getElementById('username').value = localStorage.getItem('rememberedUsername');
+        document.getElementById('remember').checked = true;
+    }
+    
+    document.querySelector('form').addEventListener('submit', function() {
+        if (document.getElementById('remember').checked) {
+            localStorage.setItem('rememberedUsername', document.getElementById('username').value);
+        } else {
+            localStorage.removeItem('rememberedUsername');
+        }
+    });
+</script>
+{% endblock %}

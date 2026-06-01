@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}StreamFlix — Home{% endblock %}
+
+{% block head %}
+<style>
+  /* HERO */
+  .hero {
+    position: relative; min-height: 70vh; display: flex; align-items: flex-end;
+    padding: 60px 48px; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background: linear-gradient(135deg, #1a0a0f 0%, #0f0a1a 100%);
+  }
+  .hero-bg img { width:100%; height:100%; object-fit:cover; opacity:0.35; }
+  .hero-gradient {
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(to top, var(--bg) 0%, transparent 50%),
+                linear-gradient(to right, var(--bg) 0%, transparent 60%);
+  }
+  .hero-content { position: relative; z-index: 2; max-width: 560px; }
+  .hero-badge { display: inline-block; background: var(--accent); color: white; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px 12px; border-radius: 4px; margin-bottom: 16px; }
+  .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: 4.5rem; line-height: 1; letter-spacing: 2px; margin-bottom: 16px; }
+  .hero-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .hero-meta span { font-size: 0.85rem; color: var(--muted); }
+  .hero-meta .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
+  .hero-desc { color: rgba(240,240,245,0.75); font-size: 0.95rem; line-height: 1.6; max-width: 440px; margin-bottom: 28px; }
+  .hero-actions { display: flex; gap: 12px; }
+
+  /* ROW */
+  .content-row { padding: 0 48px 40px; }
+  .row-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 1px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+  .row-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent); }
+  .row-scroll { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+  .row-scroll::-webkit-scrollbar { display: none; }
+  .row-card { flex: 0 0 200px; }
+
+  .no-content { text-align: center; padding: 80px; color: var(--muted); }
+  .no-content .icon { font-size: 3rem; margin-bottom: 16px; }
+
+  @media (max-width: 768px) {
+    .hero { padding: 40px 20px; min-height: 55vh; }
+    .hero-title { font-size: 2.8rem; }
+    .content-row { padding: 0 20px 32px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+{% if featured %}
+<div class="hero">
+  <div class="hero-bg">
+    {% if featured.thumbnail_url %}
+    <img src="{{ featured.thumbnail_url }}" alt="{{ featured.title }}">
+    {% endif %}
+  </div>
+  <div class="hero-gradient"></div>
+  <div class="hero-content">
+    <div class="hero-badge">✦ Featured</div>
+    <h1 class="hero-title">{{ featured.title }}</h1>
+    <div class="hero-meta">
+      {% if featured.year %}<span>{{ featured.year }}</span><span class="dot"></span>{% endif %}
+      {% if featured.rating %}<span>{{ featured.rating }}</span><span class="dot"></span>{% endif %}
+      {% if featured.duration_minutes %}<span>{{ featured.duration_minutes }} min</span>{% endif %}
+      {% if featured.genre %}<span class="badge badge-genre">{{ featured.genre }}</span>{% endif %}
+    </div>
+    {% if featured.description %}
+    <p class="hero-desc">{{ featured.description[:180] }}{% if featured.description|length > 180 %}…{% endif %}</p>
+    {% endif %}
+    <div class="hero-actions">
+      <a href="{{ url_for('videos.watch', video_id=featured.id) }}" class="btn btn-primary">
+        ▶ Play Now
+      </a>
+      <button class="btn btn-ghost">+ My List</button>
+    </div>
+  </div>
+</div>
+{% else %}
+<div style="height:40px;"></div>
+{% endif %}
+
+<!-- TRENDING -->
+{% if trending %}
+<div class="content-row">
+  <div class="row-title">🔥 Trending Now</div>
+  <div class="row-scroll">
+    {% for video in trending %}
+    <div class="row-card">
+      <a href="{{ url_for('videos.watch', video_id=video.id) }}">
+        <div class="video-card">
+          {% if video.thumbnail_url %}
+          <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}">
+          {% else %}
+          <div class="video-card-placeholder">🎬</div>
+          {% endif %}
+          <div class="video-card-overlay"><div class="play-btn-circle">▶</div></div>
+          <div class="video-card-info">
+            <div class="video-card-title">{{ video.title }}</div>
+            <div class="video-card-meta">
+              {% if video.genre %}<span>{{ video.genre }}</span>{% endif %}
+              {% if video.year %}<span>{{ video.year }}</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- RECENTLY ADDED -->
+{% if recent %}
+<div class="content-row">
+  <div class="row-title">🆕 Recently Added</div>
+  <div class="row-scroll">
+    {% for video in recent %}
+    <div class="row-card">
+      <a href="{{ url_for('videos.watch', video_id=video.id) }}">
+        <div class="video-card">
+          {% if video.thumbnail_url %}
+          <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}">
+          {% else %}
+          <div class="video-card-placeholder">🎬</div>
+          {% endif %}
+          <div class="video-card-overlay"><div class="play-btn-circle">▶</div></div>
+          <div class="video-card-info">
+            <div class="video-card-title">{{ video.title }}</div>
+            <div class="video-card-meta">
+              {% if video.genre %}<span>{{ video.genre }}</span>{% endif %}
+              {% if video.year %}<span>{{ video.year }}</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if not featured and not trending and not recent %}
+<div class="no-content">
+  <div class="icon">🎬</div>
+  <h2 style="font-family:'Bebas Neue';font-size:2rem;margin-bottom:8px;">No Content Yet</h2>
+  <p>Check back soon, or ask an admin to add videos.</p>
+  {% if current_user.is_admin %}
+  <a href="{{ url_for('admin.add_video') }}" class="btn btn-primary" style="margin-top:20px;">+ Add First Video</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

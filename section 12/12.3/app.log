@@ -1,0 +1,15 @@
+2026-05-11 16:15:38,655 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-11 16:15:38,656 - INFO - [33mPress CTRL+C to quit[0m
+2026-05-11 16:15:38,659 - INFO -  * Restarting with stat
+2026-05-11 16:15:39,085 - WARNING -  * Debugger is active!
+2026-05-11 16:15:39,091 - INFO -  * Debugger PIN: 117-882-641
+2026-05-11 16:15:40,603 - INFO - Application started
+2026-05-11 16:15:40,603 - INFO - 127.0.0.1 - - [11/May/2026 16:15:40] "GET / HTTP/1.1" 200 -
+2026-05-11 16:16:05,182 - INFO -  * Detected change in 'C:\\Users\\Thinknyx_Kanishk\\Desktop\\Thinknyx\\Flask Course\\app.py', reloading
+2026-05-11 16:16:05,249 - INFO -  * Restarting with stat
+2026-05-11 16:16:10,121 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-11 16:16:10,121 - INFO - [33mPress CTRL+C to quit[0m
+2026-05-11 16:16:12,090 - INFO - Application started
+2026-05-11 16:16:12,091 - INFO - 127.0.0.1 - - [11/May/2026 16:16:12] "GET / HTTP/1.1" 200 -
